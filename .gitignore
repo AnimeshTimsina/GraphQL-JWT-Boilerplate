@@ -12,6 +12,9 @@
 /build
 
 # misc
+.env
+.todo.txt
+.temp.txt
 .DS_Store
 .env.local
 .env.development.local

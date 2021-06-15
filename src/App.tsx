@@ -1,25 +1,35 @@
+import { useQuery } from '@apollo/client';
+import { accessTokenQuery } from 'apollo-config/interface';
+import { GET_ACCESS_TOKEN_LOCALLY } from 'apollo-config/localQueries';
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { BrowserRouter, Route, Switch, Redirect } from 'react-router-dom';
+import ProtectedRoute from 'utils/protectedRoute';
+import { useAuthUtils } from 'utils/useAuthUtils';
+import LoginPage from 'views/login/login';
+import NotFoundPage from 'views/notFound/notFound';
+import TestPage from 'views/test/test';
 
-function App() {
+const App = () => {
+  const {isLoggedIn} = useAuthUtils()
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <BrowserRouter>
+      <Switch>
+        <ProtectedRoute
+          child={<TestPage />}
+          path='/'
+          exact
+        />
+        <Route
+          exact
+          path="/login"
+          render={() => isLoggedIn ? <Redirect to={'/'} />
+            : <LoginPage />}
+        />
+        <Route
+          component={NotFoundPage}
+        />
+      </Switch>
+    </BrowserRouter>
   );
 }
 
