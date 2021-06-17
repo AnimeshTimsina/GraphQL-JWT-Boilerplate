@@ -1,5 +1,5 @@
 import { accessTokenVar } from "./cache"
-import {AES} from 'crypto-js'
+import {AES,enc} from 'crypto-js'
 
 const REFRESH_TOKEN_NAME = "rtkn"
 
@@ -10,8 +10,13 @@ export const setRefreshToken = (s: string) => {
 
 export const getRefreshToken = () => {
 const hashed = localStorage.getItem(REFRESH_TOKEN_NAME)
-const bytes = hashed ? AES.decrypt(hashed,`${process.env.REACT_APP_ENCRYPTION_KEY}`) : null
-return bytes?.toString(CryptoJS.enc.Utf8) ?? null
+try{
+  const bytes = hashed ? AES.decrypt(hashed,`${process.env.REACT_APP_ENCRYPTION_KEY}`) : null
+  return bytes?.toString(enc.Utf8) ?? null
+} catch(err) {
+  deleteRefreshToken()
+  return null
+}
 }
 
 export const setAccessToken = (s: string | null) => {

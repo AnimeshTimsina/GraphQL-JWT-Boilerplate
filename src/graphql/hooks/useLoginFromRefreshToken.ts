@@ -1,30 +1,25 @@
 import { useMutation } from "@apollo/client"
-import { accessTokenVar } from "apollo-config/cache"
-import { deleteRefreshToken, setRefreshToken } from "apollo-config/tokenModifier"
-import { loginFromCredentials, loginFromCredentialsVariables } from "graphql/generated/loginFromCredentials"
-import { LOGIN_FROM_CREDENTIALS } from "graphql/mutations"
+import { deleteRefreshToken, setAccessToken, setRefreshToken } from "apollo-config/tokenModifier"
+import { loginFromRefreshToken, loginFromRefreshTokenVariables } from "graphql/generated/loginFromRefreshToken"
+import { LOGIN_FROM_REFRESH_TOKEN } from "graphql/mutations"
 import { alertErrorHandler } from "utils/errorHandler"
 
-export const useLoginFromCredentials = ({remember,ifSuccess,ifError}:{
-    remember:boolean,
+export const useLoginFromRefreshToken = ({ifSuccess,ifError}:{
     ifSuccess?:()=>void,
     ifError?:()=>void
 }) => {
     const [doLogin, { loading, error }] = useMutation<
-    loginFromCredentials,
-    loginFromCredentialsVariables
-  >(LOGIN_FROM_CREDENTIALS, {
-    onCompleted({ tokenAuth }) {
-      if (!tokenAuth) {
+    loginFromRefreshToken,
+    loginFromRefreshTokenVariables
+  >(LOGIN_FROM_REFRESH_TOKEN, {
+    onCompleted({ refreshToken }) {
+      if (!refreshToken) {
+        deleteRefreshToken()
         ifError && ifError()
       } else {
-        remember === true
-          ? setRefreshToken(tokenAuth.refreshToken)
-          : deleteRefreshToken()
-        accessTokenVar({
-          token: tokenAuth.token,
-        })
-        if (tokenAuth.user) {
+        setAccessToken(refreshToken?.token)
+        setRefreshToken(refreshToken.refreshToken)
+        if (refreshToken.user) {
             //save user to cache
             //change language based on current user's default language
         //   userInfoVar(tokenAuth.user)
@@ -41,8 +36,8 @@ export const useLoginFromCredentials = ({remember,ifSuccess,ifError}:{
     },
     onError(err) {
       ifError && ifError()
+      deleteRefreshToken()
       alertErrorHandler(err)
-      // console.log(message);
     }
   })
   return({

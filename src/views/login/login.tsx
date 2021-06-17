@@ -1,8 +1,10 @@
 import { useLoginFromCredentials } from 'graphql/hooks/useLoginFromCredentials'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useHistory } from 'react-router-dom'
+import { useAuthUtils } from 'utils'
 
 const LoginPage = () => {
+    const {isLoggedIn} = useAuthUtils()
     const {replace} = useHistory()
     const [username, setUsername] = useState<string>('')
     const [password, setPassword] = useState<string>('')
@@ -20,6 +22,13 @@ const LoginPage = () => {
             }
         })
     }
+
+    useEffect(() => {
+        let isActive = true
+        if (isLoggedIn && isActive) replace('/')  
+        return () => { isActive = false };
+    }, [isLoggedIn,replace])
+
     if (loading) {
         return <div>Loading...</div>
     }
